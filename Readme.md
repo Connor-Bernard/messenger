@@ -20,7 +20,7 @@ This project is an encrypted messenger application that allows users to log in s
 
 ## Design
 
-### Account Management System (AMS) - Registering for an account
+### Account Management Subsystem (AMS) - Registering for an account
 
 The registration process will be relatively straight forward.  To register, the user will take these actions:
 
@@ -61,3 +61,60 @@ The user can send messages to other users they have added as friends.  They will
 ### Realtime Messaging
 
 The realtime element of this messaging system is handled using a custom request-response protocol similar to HTTP.  To avoid having active connections through sockets or requiring polling of a db, when the server receives a message from a user, the receiving user is then sent a message directly from the server if they have an active session.  If they do not have an active session, the message is just persisted.  __NOTE__: encrypted messages are persisted even if the user is active so that they can view their history at a later date.
+
+## Database Model
+
+```mermaid
+erDiagram
+
+user {
+    INTEGER(PK) id
+    TEXT(PK)    username
+    TEXT        email
+    TEXT        first_name
+    TEXT        last_name
+}
+
+key {
+    INTEGER(PK)  id
+    TEXT(PK)     public_key
+    TEXT         private_key_encrypted
+    TEXT         pbkdf_salt
+}
+
+password {
+    INTEGER(PK) id
+    TEXT        password
+    TEXT        salt
+}
+
+session {
+    INTEGER(PK) id
+    TEXT(PK)    token
+    NUMERIC     start_datetime
+    NUMERIC     end_datetime
+}
+
+friendship {
+    INTEGER(PK)      id
+    INTEGER(CPK)(FK) requestor_id
+    INTEGER(CPK)(FK) friend_id
+}
+
+message {
+    INTEGER(PK) id
+    INTEGER(CPK)(FK) sender_id
+    INTEGER(CPK)(FK) receiver_id
+    NUMERIC(CPK)     send_time
+    TEXT             message
+    TEXT             signature
+}
+
+user ||--|| password : has
+user ||--|| key : has
+user ||--o| session: creates
+
+user }|--o{ friendship : friends
+
+friendship ||--o{ message : has
+```
