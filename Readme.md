@@ -16,7 +16,7 @@ This project is an encrypted messenger application that allows users to log in s
 ## Key Technologies
 
 - Backend logic will be done with Go
-- Persistance will be done using a MySQL database
+- Persistance will be done using a SQLite database
 
 ## Design
 
@@ -67,42 +67,51 @@ The realtime element of this messaging system is handled using a custom request-
 ```mermaid
 erDiagram
 
-user {
+users {
     INTEGER(PK) id
-    TEXT(PK)    username
+    TEXT        username
     TEXT        email
     TEXT        first_name
     TEXT        last_name
+    INTEGER(FK) passwords_id
+    INTEGER(FK) keys_id
+    INTEGER(FK) sessions_id
 }
 
-key {
+keys {
     INTEGER(PK)  id
-    TEXT(PK)     public_key
+    TEXT         public_key
     TEXT         private_key_encrypted
     TEXT         pbkdf_salt
 }
 
-password {
+passwords {
     INTEGER(PK) id
     TEXT        password
     TEXT        salt
 }
 
-session {
+sessions {
     INTEGER(PK) id
-    TEXT(PK)    token
+    TEXT        token
     NUMERIC     start_datetime
     NUMERIC     end_datetime
 }
 
-friendship {
-    INTEGER(PK)      id
-    INTEGER(CPK)(FK) requestor_id
-    INTEGER(CPK)(FK) friend_id
+friend_requests {
+    INTEGER(CPK)(FK) requester_id
+    INTEGER(CPK)(FK) receiver_id
+    NUMERIC          request_datetime
+    BOOLEAN          accepted
 }
 
-message {
-    INTEGER(PK) id
+friendships {
+    INTEGER(CPK)(FK) users_id
+    INTEGER(CPK)(FK) friend_id
+    NUMERIC          friendship_begin_datetime
+}
+
+messages {
     INTEGER(CPK)(FK) sender_id
     INTEGER(CPK)(FK) receiver_id
     NUMERIC(CPK)     send_time
@@ -110,11 +119,12 @@ message {
     TEXT             signature
 }
 
-user ||--|| password : has
-user ||--|| key : has
-user ||--o| session: creates
+users ||--|| passwords : has
+users ||--|| keys : has
+users ||--o| sessions: creates
 
-user }|--o{ friendship : friends
+users ||--o{ friend_requests : has
+users ||--o{ friendships : friends
 
-friendship ||--o{ message : has
+friendships ||--o{ messages : has
 ```
