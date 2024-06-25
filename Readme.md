@@ -4,6 +4,13 @@
 
 This project is an encrypted messenger application that allows users to log in securely, add other users as friends, send messages to other users, and view messages sent to the logged in user all in real time.
 
+## TODO
+
+- [x] Configure project structure
+- [x] Set up db schema
+- [x] Configure environment
+- [ ] Set up go integration with db
+
 ## Key Features
 
 - [ ] Users can register for an account.
